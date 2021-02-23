@@ -26,7 +26,7 @@ $.fn.myfunction = function(){
         'no_annotations': 1
       },
       dataType: 'json',
-      statusCode: {
+      
         success:function(response){  
           
           const countrycode = response.results[0].components.country_code;
@@ -34,7 +34,7 @@ $.fn.myfunction = function(){
           
           // AJAX call to get the border outline using the countrycode given from a click using the opencagedata api
           $.ajax({
-            url: '../Gazetteer/countryBorders.geo.json',
+            url: 'countryBorders.geo.json',
             type: 'GET',
             dataType: "json",
         
@@ -161,7 +161,7 @@ $.fn.myfunction = function(){
 
             // AJAX call for the capital cities coordinates, used for a marker to show the location of the capital city when clicked. 
             $.ajax({
-              url: '../Gazetteer/capitalcities.json',
+              url: 'capitalcities.json',
               type: 'POST',
               dataType: "json",
               success: function(result){
@@ -290,7 +290,7 @@ $.fn.myfunction = function(){
       error: function(error){
         console.log(error)
       }
-    }
+    
     })
     //Setting a popup from where abouts you click on the country, and a flag will appear with Country name and name of capital city. Also a marker will appear of the location of the capital city. 
     popup
@@ -326,7 +326,7 @@ $.fn.myfunction = function(){
 $('#btnRun').click(function(){
     //Using the value of the country selected in the select bar to the retrieve the border data from the countryBorders.geo.json file 
     $.ajax({
-        url: '../Gazetteer/countryBorders.geo.json',
+        url: 'countryBorders.geo.json',
         type: "POST",
         dataType: "JSON",
         success: function(result){        
@@ -413,25 +413,7 @@ $('#btnRun').click(function(){
             }
           })  
           
-          //AJAX call for the currency exhange from a given country to Euros
-          $.ajax({
-            url: 'http://data.fixer.io/api/latest?access_key=e29fafd053f183ac7e7d206650555c4e',
-            type: 'POST',
-            data: 'JSON',
-            success: function(result){
-              const currency = result.rates[currencycode]
-              //Attaching and removinng the given currency when a new currency is clicked
-              let update = $('#currencyToEuro').append(currency)
-                if (update){
-                  $('#btnRun').click(function(){
-                    $('#currencyToEuro').empty();
-                  })
-                }
-              },
-              error: function(error){
-                console.log(error)
-              }
-            })
+
 
           //AJAX call for the countryInfo API, and using the data retrieved from this call for future AJAX calls
           $.ajax({
@@ -451,7 +433,7 @@ $('#btnRun').click(function(){
 
               //AJAX call using the capitalcities API, using the capital city retrieved from the selected country used for the CountryInfo API
               $.ajax({
-                url: "../Gazetteer/capitalcities.json",
+                url: "capitalcities.json",
                 type: "POST",
                 dataType: "JSON",
                 success: function(result){
@@ -562,6 +544,7 @@ $('#btnRun').click(function(){
                     },
                     success: function(result){
                       let flagurl = result.data.flag
+                      const currencycode = result.data.currencies[0].code; 
                       $("#currencysymbol").html(result["data"]["currencies"][0]["symbol"])
                       $("#txtcurrency").html(result["data"]["currencies"][0]["name"])
                       $(".flagurl").attr("src", flagurl, result)
@@ -590,7 +573,27 @@ $('#btnRun').click(function(){
                         }
                       })
                     */
+                      //AJAX call for the currency exhange from a given country to Euros
+                      $.ajax({
+                        url: 'http://data.fixer.io/api/latest?access_key=e29fafd053f183ac7e7d206650555c4e',
+                        type: 'POST',
+                        data: 'JSON',
+                        success: function(result){
+                          const currency = result.rates[currencycode]
+                          //Attaching and removinng the given currency when a new currency is clicked
+                          let update = $('#currencyToEuro').append(currency)
+                            if (update){
+                              $('#btnRun').click(function(){
+                                $('#currencyToEuro').empty();
+                              })
+                            }
+                          },
+                          error: function(error){
+                            console.log(error)
+                          }
+                        })                     
                       //AJAX call for the getWeather API 
+                      
                       $.ajax({
                         url: './libs/php/getWeather.php',
                         type: 'POST',
@@ -644,7 +647,7 @@ $('#btnRun').click(function(){
 
 })
 
-//Calling the functions to toggle the div's on the HTML document 
+//Calling the functions to toggle the div's on the HTML document
 $('#btnInfo').on('click', function(){
   $('#containerCountryInfo').toggle();
 })
