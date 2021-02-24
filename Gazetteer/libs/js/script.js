@@ -15,7 +15,8 @@ $.fn.myfunction = function(){
         let lat = e.latlng.lat;
         let lng = e.latlng.lng;
         let latlng = `${lat},${lng}`
-        
+    
+    
     //Using the latitude and longitude retrieved from clicking on the map and using the data retrieved here for future AJAX calls. 
     $.ajax({
       url: 'https://api.opencagedata.com/geocode/v1/json',
@@ -32,6 +33,37 @@ $.fn.myfunction = function(){
           const countrycode = response.results[0].components.country_code;
           $('.continent').html(response["results"][0]["components"]["continent"]);
           
+          $.ajax({
+            url: 'map.geojson.json',
+            type: 'GET',
+            dataType: 'JSON',
+            success: function(result){
+
+             
+              for (let i = 0; i < result.features.length; i++){
+              const IsoA2ForCity = result.features[i].properties.ISO_A2;
+              const IsoA2 = IsoA2ForCity.toLowerCase();
+              if (IsoA2 === countrycode){
+              const cityMarkerCoords = result.features[i]
+              const cityMarkerLat = result.features[i].properties.LATITUDE;
+              const cityMarkerLng = result.features[i].properties.LONGITUDE;
+              
+              var marker = L.marker([cityMarkerLat, cityMarkerLng])
+              var markers = L.featureGroup([marker])
+              markers.addTo(map)
+              if (markers){
+                map.on('click', function(){
+                  markers.clearLayers();
+                })
+              }      
+              }
+          }
+          },
+          error:function(error){
+            console.log(error)
+          }
+        })
+
           // AJAX call to get the border outline using the countrycode given from a click using the opencagedata api
           $.ajax({
             url: 'countryBorders.geo.json',
@@ -67,6 +99,7 @@ $.fn.myfunction = function(){
           });
       
           //AJAX call for the national holiday data, using the countrycode from opencagedata api 
+          /*
           $.ajax({
             url: 'libs/php/getNationalHolidays.php',
             type: 'GET',
@@ -98,7 +131,8 @@ $.fn.myfunction = function(){
               console.log(error)
             }
           })
-        
+          */
+         /*
           //AJAX call to get the news from a given country
           $.ajax({
             url: "http://newsapi.org/v2/top-headlines?apiKey=e5f36fe128a24ee3bb3a938e6ed69f66",
@@ -134,7 +168,8 @@ $.fn.myfunction = function(){
               console.log(error)   
             }
           })  
-        
+          */
+         
           //AJAX call to get country information
           $.ajax({
             url: './libs/php/getCountryInfo.php',
@@ -193,7 +228,7 @@ $.fn.myfunction = function(){
             // Using the getRestCountries API to retrieve more data
             let alpha3 = result.data[0].isoAlpha3
             let alpha3lower = alpha3.toLowerCase()
-            
+            /* 
             $.ajax({
               url: './libs/php/getRestCountries.php',
               type: "POST",
@@ -233,7 +268,7 @@ $.fn.myfunction = function(){
                     console.log(error)
                   }
                 })
-               /* //Using the getExchangeRates api to get currency for a given currency for US dollars. API call commented out because I have run out of available API calls. 
+                //Using the getExchangeRates api to get currency for a given currency for US dollars. API call commented out because I have run out of available API calls. 
                 $.ajax({
                   url: './libs/php/getExchangeRates.php',
                   type: 'POST',
@@ -249,13 +284,13 @@ $.fn.myfunction = function(){
                     console.log(error);
                   }
                 
-                })*/
+                })
               },
               error: function(error){
                 console.log(error)
               }
             })
-            
+            */
            // AJAX call for retrieving Weather information, using the capital variable declared in the getcountryInfo AJAX call
             $.ajax({
               url: './libs/php/getWeather.php',
@@ -326,10 +361,11 @@ $.fn.myfunction = function(){
 $('#btnRun').click(function(){
     //Using the value of the country selected in the select bar to the retrieve the border data from the countryBorders.geo.json file 
     $.ajax({
-        url: 'countryBorders.geo.json',
+        url: 'libs/php/getCountryBorders.php',
         type: "POST",
         dataType: "JSON",
-        success: function(result){        
+        success: function(result){    
+          console.log(result)
           const val = $("#countryselect").val();
           for (let i = 0; i < result.features.length; i++){
             const bordercode = result.features[i].properties.iso_a2
